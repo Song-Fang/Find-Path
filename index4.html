@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <style type="text/css">
+            #ul1{
+                margin: 30px auto;
+                border: 1px solid black;
+                border-bottom: none;
+                border-right:none ;
+                padding: 0;
+                height: auto;
+                overflow: hidden;
+            }
+            #ul1 li{
+                list-style: none;
+                border: 1px solid black;
+                border-top:none ;
+                border-left:none ;
+                float: left;
+            }
+            #ul1 li.style1{
+                background-color: red;
+            }
+            #ul1 li.style2{
+                background-color: black;
+            }
+            #ul1 li.style3{
+                background-image: url(img/target.jpg);
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-color: green;
+            }
+            
+            #ul1 li.style4{
+                background-image: url(img/target.jpg);
+                background-repeat: no-repeat;
+                background-size:contain;
+                background-color: dodgerblue;
+            }
+            
+            #ul1 li.style6{
+                background-color: cornflowerblue;
+            }
+            
+            #btn{
+                position: absolute;
+                top: 165px;
+                left:1000px;
+                height:50px;
+                width:120px;
+                font-family:"times new roman";
+                font-weight: bold;
+                font-size:20px;
+                border:solid 8px;
+            	border-color:orangered;
+            	background-color: black;
+            	border-radius:18px;
+            	color:white;
+            	cursor: pointer;
+            }
+            #btn:hover{
+                background-color: blue;
+                color: yellow;
+                border-radius: 8px;
+                
+            }
+            
+            #timer{
+            	position:absolute;
+            	top:75px;
+            	left:1023px;
+            	border:solid 8px;
+            	border-color:dodgerblue;
+            	background-color: black;
+            	height:70px;
+            	width:70px;
+            	color:white;
+            	font-size: 38px;
+            	font-weight: bold;
+            	font-family:"times new roman";
+            	border-radius:18px;
+            }
+            
+            #reset{
+            	position: absolute;
+                top: 320px;
+                left:1000px;
+                height:50px;
+                width:120px;
+                font-family:"times new roman";
+                font-weight: bold;
+                font-size:20px;
+                border:solid 8px;
+            	border-color:limegreen;
+            	background-color: black;
+            	border-radius:18px;
+            	color:white;
+            	cursor: pointer;
+            }
+            
+            #reset:hover{
+            	background-color: orange;
+                color: dodgerblue;
+                border-radius: 8px;
+            }
+            
+            #continue{
+            	position: absolute;
+                top: 240px;
+                left:940px;
+                height:50px;
+                width:120px;
+                font-family:"times new roman";
+                font-weight: bold;
+                font-size:18px;
+                border:solid 8px;
+            	border-color:mediumpurple;
+            	background-color: black;
+            	border-radius:18px;
+            	color:white;
+            	cursor: pointer;
+            }
+            
+            #continue:hover{
+            	background-color: greenyellow;
+                color: dodgerblue;
+                border-radius: 8px;
+            }
+            
+            #continue2{
+            	position: absolute;
+                top: 240px;
+                left:1065px;
+                height:50px;
+                width:120px;
+                font-family:"times new roman";
+                font-weight: bold;
+                font-size:18px;
+                border:solid 8px;
+            	border-color:darkorange;
+            	background-color: black;
+            	border-radius:18px;
+            	color:white;
+            	cursor: pointer;
+            }
+            
+            #continue2:hover{
+            	background-color: pink;
+                color: dodgerblue;
+                border-radius: 8px;
+            }
+            
+            
+            #head{
+            	position: absolute;
+            	top: 20px;
+                left:35px;
+                font-size: 25px;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <ul id="ul1">
+            
+        </ul>
+        
+        <input type="button" id="timer" value=""/>
+        <input type="button" id="continue" value="Continue!">
+        <input type="button" id="continue2" value="Keep Going!">
+        
+        <input id="btn" type="button" value="Find Path!"/>
+        
+        
+        <a href="index4.html"><input type="button" id="reset" value="Reset!"/></a>
+        
+        <h3 id="head">#Demo4<br/>#Random Block <br/>&nbsp;&nbsp;with MidPoints</h3>
+        
+        <script type="text/javascript">
+            var timer2 = document.getElementById("timer");
+            timer2.value="0";
+            //1 找对象
+            var oUl = document.getElementById("ul1");
+            var aLi = document.getElementsByTagName("li");
+            var oBtn = document.getElementById("btn");
+            var continue1 = document.getElementById("continue");
+            continue1.disabled=true;
+            var continue2 = document.getElementById("continue2");
+            continue2.disabled=true;
+           
+            var beginLi = document.getElementsByClassName("style1");
+            var endLi = document.getElementsByClassName("style3");
+            
+            var openArr = [];
+            var closeArr = [];
+            
+            var map = [];
+          
+            for(var i =0;i<400;i++){
+            	var a=Math.random()*8;
+            	
+            	if(a<2){
+            		a=2;
+            	}else{
+            		a=0;
+            	}
+            	map.push(a);
+            }
+            map[0]=1;
+            map[144]=3;
+            map[275]=4;
+
+            map[399]=6
+            /*
+             * 定义初始化函数
+             * 
+             */
+            
+               
+                
+            function init(){
+                
+                createMap();
+                oBtn.onclick=function(){
+                	openFn();
+                	continue1.disabled=false;
+                }
+                
+            }
+            
+            var resultParent = [];
+            init();
+            
+             	
+            	
+            function createMap(){
+                 
+                var liSize = 28;
+              
+                for(var i=0;i<map.length;i++){
+                   
+                    var oLi = document.createElement("li");
+                    
+                    oLi.style.width = liSize +"px";
+                    oLi.style.height = liSize + "px";
+                    
+                    
+                    oUl.appendChild(oLi);
+                    
+                    if(map[i]==1){
+                      
+                        oLi.className = "style1";
+                        openArr.push(oLi);
+                    }else if(map[i]==2){
+                        
+                        oLi.className = "style2";
+                        closeArr.push(oLi);
+                    }else if(map[i]==3){
+                        
+                        oLi.className = "style3";
+                    }else if(map[i]==4){
+                        
+                        oLi.className = "style4";
+                        
+                    }else if(map[i]==6){
+                        
+                        oLi.className = "style6";
+                    }
+                    
+                    
+                }
+                oUl.style.width = 20*(liSize+1)+"px"
+            }
+            
+            
+            
+            function fn(nowLi){
+            	
+            	return g(nowLi)+h(nowLi);
+            	
+            }
+            
+            function g(nowLi){
+            	var a = nowLi.offsetLeft-beginLi[0].offsetLeft;
+            	var b = nowLi.offsetTop - beginLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+            
+            function h(nowLi){
+            	var a = nowLi.offsetLeft-endLi[0].offsetLeft;
+            	var b = nowLi.offsetTop-endLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+            
+            function openFn(){
+            	var nodeLi = openArr.shift();
+            	
+            	if(nodeLi==endLi[0]){
+            		showPath();
+            		return;
+            	}
+            	closeFn(nodeLi);
+            	findLi(nodeLi);
+            	
+            	
+            	openArr.sort(function(li1,li2){
+            		return li1.num-li2.num;
+            	})
+            	
+            	openFn();
+            }
+            
+            function closeFn(nodeLi){
+            	closeArr.push(nodeLi);
+            }
+            
+            function findLi(nodeLi){
+            	var result = [];
+            	//排除障碍物，把所有点放入result集合内
+            	for(var i = 0;i<aLi.length;i++){
+            		if(filter(aLi[i])){
+            			result.push(aLi[i]);
+            			//aLi[i].style.background="yellow";
+            		}
+            	}
+            	//找与当前节点相邻的节点
+            	
+            	for(var i =0;i<result.length;i++){
+            	
+            		if(Math.abs(nodeLi.offsetLeft - result[i].offsetLeft)<=29 && Math.abs(nodeLi.offsetTop - result[i].offsetTop)<=29 ){
+            			//添加一个自定义的属性
+            			result[i].num=fn(result[i]);
+            			result[i].parent=nodeLi;
+            			openArr.push(result[i]);
+            			if(result[i]!=endLi[0]){
+            				result[i].style.background="limegreen";
+            			}
+            		}
+            		
+            	}
+            }
+            
+            function filter(nodeLi){
+            	for(var i = 0;i<closeArr.length;i++){
+            		if(nodeLi==closeArr[i]){
+            			return false;
+            		}
+            	}
+            	
+            	for(var i =0;i<openArr.length;i++){
+            		if(nodeLi==openArr[i]){
+            			return false;
+            		}
+            	}
+            	
+            	return true;
+            }
+            
+            
+            
+            
+            
+            function showPath(){
+            	var lastLi = closeArr.pop();
+            	var iNow = 0;
+            	var time = 1;
+       
+            	
+            	findParent(lastLi);
+            	
+            	var timer = setInterval(function(){
+            		resultParent[iNow].style.background="red";
+            		iNow++;
+            		if(iNow==resultParent.length){
+            			clearInterval(timer);
+            			oBtn.disabled=true;
+            			
+            		}
+            	},500)
+            	
+            	var desTime = setInterval(function(){
+            		timer2.value=iNow;
+            		if(iNow==resultParent.length){
+            			clearInterval(desTime);
+            		}
+            		
+            	},500)
+            }
+            
+            
+            function findParent(li){
+            	resultParent.unshift(li);
+            	if(li.parent==beginLi[0]){
+            		return;
+            	}
+            	findParent(li.parent);
+            }
+            
+       		//The second path
+       		  
+            continue1.onclick= function(){
+             	openArr = [];
+            	resultParent = [];
+            	beginLi = document.getElementsByClassName("style3");
+           	  	endLi = document.getElementsByClassName("style4");
+            	openArr.push(beginLi[0]);
+            	openFn();
+            	continue1.disabled=true;
+            	continue2.disabled=false;
+            }
+            
+            //The third path
+            continue2.onclick= function(){
+             	continue2.disabled=true;
+             	openArr = [];
+            	resultParent = [];
+            	beginLi = document.getElementsByClassName("style4");
+           	  	endLi = document.getElementsByClassName("style6");
+            	openArr.push(beginLi[0]);
+            	openFn();
+            	
+            }
+            
+        </script>
+    </body>
+</html>
+

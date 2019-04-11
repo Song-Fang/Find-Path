@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <style type="text/css">
+            #ul1{
+                margin: 30px auto;
+                border: 1px solid black;
+                border-bottom: none;
+                border-right:none ;
+                padding: 0;
+                height: auto;
+                overflow: hidden;
+            }
+            #ul1 li{
+                list-style: none;
+                border: 1px solid black;
+                border-top:none ;
+                border-left:none ;
+                float: left;
+            }
+            #ul1 li.style1{
+                background-color: red;
+            }
+            #ul1 li.style2{
+                background-color: black;
+            }
+            #ul1 li.style3{
+                background-color: orange;
+            }
+            
+            #ul1 li.style4{
+                background-color: green;
+            }
+            
+            #ul1 li.style5{
+                background-color: mediumpurple;
+            }
+            
+            #ul1 li.style6{
+                background-color: cornflowerblue;
+            }
+            
+            #btn{
+                position: absolute;
+                top: 190px;
+                left:975px;
+                height:50px;
+                width:120px;
+                font-family:"times new roman";
+                font-weight: bold;
+                font-size:20px;
+                border:solid 8px;
+            	border-color:orangered;
+            	background-color: black;
+            	border-radius:18px;
+            	color:white;
+            	cursor: pointer;
+            }
+            #btn:hover{
+                background-color: blue;
+                color: yellow;
+                border-radius: 8px;
+                
+            }
+            
+            #timer{
+            	position:absolute;
+            	top:80px;
+            	left:1000px;
+            	border:solid 8px;
+            	border-color:dodgerblue;
+            	background-color: black;
+            	height:70px;
+            	width:70px;
+            	color:white;
+            	font-size: 38px;
+            	font-weight: bold;
+            	font-family:"times new roman";
+            	border-radius:18px;
+            }
+            
+            #reset{
+            	position: absolute;
+                top: 280px;
+                left:975px;
+                height:50px;
+                width:120px;
+                font-family:"times new roman";
+                font-weight: bold;
+                font-size:20px;
+                border:solid 8px;
+            	border-color:limegreen;
+            	background-color: black;
+            	border-radius:18px;
+            	color:white;
+            	cursor: pointer;
+            }
+            
+            #reset:hover{
+            	background-color: orange;
+                color: dodgerblue;
+                border-radius: 8px;
+            }
+            
+            #head{
+            	position: absolute;
+            	top: 20px;
+                left:35px;
+                font-size: 30px;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <ul id="ul1">
+            
+        </ul>
+        
+        <input type="button" id="timer" value=""/>
+        
+        <input id="btn" type="button" value="Find Path!"/>
+        
+        <a href="index1.html"><input type="button" id="reset" value="Reset!"/></a>
+        <h3 id="head">#Demo1<br/>#Breadth-First-Search</h3>
+        
+        <script type="text/javascript">
+            var timer2 = document.getElementById("timer");
+            timer2.value="0";
+            //1 找对象
+            var oUl = document.getElementById("ul1");
+            var aLi = document.getElementsByTagName("li");
+            var oBtn = document.getElementById("btn")
+            //创建一个数组来表示地图，这个地图  20 * 20  其中 值为1 表示起始节点   值为2 表示障碍物  值为3 表示目标节点
+            var beginLi = document.getElementsByClassName("style1");
+            var endLi = document.getElementsByClassName("style5");
+            
+            var openArr = [];
+            var closeArr = [];
+            
+            var map = [
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,
+                0,0,1,0,2,2,2,2,0,0,0,0,0,0,0,0,2,0,0,0,
+                0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,2,0,0,0,
+                0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,
+                0,0,0,0,0,0,0,0,2,0,0,0,0,0,2,2,2,0,0,0,
+                0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,5,0,0,2,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,2,0,0,
+                0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,2,0,0,
+                0,2,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,2,0,0,
+                0,2,2,0,0,0,0,0,0,0,0,2,0,2,2,2,2,2,0,0,
+                0,0,2,0,0,0,0,0,0,2,0,2,0,0,0,0,0,0,0,0,
+                0,0,2,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,
+                0,0,2,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,
+                0,0,2,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,
+                0,0,2,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0
+            ]
+            
+            /*
+             * 定义初始化函数
+             */
+            function init(){
+                //在这个函数中需要动态创建出li 通过调用封装好的函数实现
+                createMap();
+                oBtn.onclick=function(){
+                	openFn();
+                }
+            }
+            //调用初始化函数
+            var resultParent = [];
+            init();
+            /*
+             * 定义创建地图函数
+             */
+            function createMap(){
+                //定义li的大小  
+                var liSize = 28;
+              
+                for(var i=0;i<map.length;i++){
+                   
+                    var oLi = document.createElement("li");
+                    
+                    oLi.style.width = liSize +"px";
+                    oLi.style.height = liSize + "px";
+                    
+                    
+                    oUl.appendChild(oLi);
+                    
+                    if(map[i]==1){
+                      
+                        oLi.className = "style1";
+                        openArr.push(oLi);
+                    }else if(map[i]==2){
+                        
+                        oLi.className = "style2";
+                        closeArr.push(oLi);
+                    }else if(map[i]==5){
+                        
+                        oLi.className = "style5";
+                    }
+                    
+                    
+                }
+                oUl.style.width = 20*(liSize+1)+"px"
+            }
+            
+            
+            
+            function fn(nowLi){
+            	
+            	return g(nowLi)+h(nowLi);
+            	
+            }
+            
+            function g(nowLi){
+            	var a = nowLi.offsetLeft-beginLi[0].offsetLeft;
+            	var b = nowLi.offsetTop - beginLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+            
+            function h(nowLi){
+            	var a = nowLi.offsetLeft-endLi[0].offsetLeft;
+            	var b = nowLi.offsetTop-endLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+            
+            function openFn(){
+            	var nodeLi = openArr.shift();
+            	
+            	if(nodeLi==endLi[0]){
+            		showPath();
+            		return;
+            	}
+            	closeFn(nodeLi);
+            	findLi(nodeLi);
+//          	openArr.sort(function(li1,li2){
+//          		return li1.num-li2.num;
+//          	})
+            	
+            	openFn();
+            }
+            
+            function closeFn(nodeLi){
+            	closeArr.push(nodeLi);
+            }
+            
+            function findLi(nodeLi){
+            	var result = [];
+            	//排除障碍物，把所有点放入result集合内
+            	for(var i = 0;i<aLi.length;i++){
+            		if(filter(aLi[i])){
+            			result.push(aLi[i]);
+            			
+            		}
+            	}
+            	//找与当前节点相邻的节点
+            	
+            	for(var i =0;i<result.length;i++){
+            	
+            		if(Math.abs(nodeLi.offsetLeft - result[i].offsetLeft)<=29 && Math.abs(nodeLi.offsetTop - result[i].offsetTop)<=29 ){
+            			//添加一个自定义的属性
+            			result[i].num=fn(result[i]);
+            			result[i].parent=nodeLi;
+            			openArr.push(result[i]);
+            			if(result[i]!=endLi[0]){
+            				result[i].style.background="limegreen";
+            			}
+            	
+            			
+            		}
+            		
+            	}
+            }
+            
+
+            
+            function filter(nodeLi){
+            	for(var i = 0;i<closeArr.length;i++){
+            		if(nodeLi==closeArr[i]){
+            			return false;
+            		}
+            	}
+            	
+            	for(var i =0;i<openArr.length;i++){
+            		if(nodeLi==openArr[i]){
+            			return false;
+            		}
+            	}
+            	
+            	return true;
+            }
+            
+            
+            
+            
+            
+            function showPath(){
+            	var lastLi = closeArr.pop();
+            	var iNow = 0;
+            	var time = 1;
+       
+            	
+            	findParent(lastLi);
+            	
+            	var timer = setInterval(function(){
+            		resultParent[iNow].style.background="red";
+            		iNow++;
+            		if(iNow==resultParent.length){
+            			clearInterval(timer);
+            			oBtn.disabled=true;
+            		}
+            	},500)
+            	
+            	var desTime = setInterval(function(){
+            		timer2.value=iNow;
+            		if(iNow==resultParent.length){
+            			clearInterval(desTime);
+            		}
+            		
+            	},500)
+            }
+            
+            
+            function findParent(li){
+            	resultParent.unshift(li);
+            	if(li.parent==beginLi[0]){
+            		return;
+            	}
+            	findParent(li.parent);
+            }
+            
+            
+            
+        </script>
+    </body>
+</html>
