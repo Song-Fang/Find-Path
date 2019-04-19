@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Breadth First Search</title>
+        <link rel="stylesheet" type="text/css" href="css/layout.css">        
+    </head>
+    <body>
+    	<div id="header">
+    		<h3 id="head">#Demo1: Breadth-First-Search</h3>
+    	</div>
+    	<div id="btnbox">
+    		<input type="button" id="timer" value=""/>
+        	<input type="button" id="btn" value="Find Path!"/>
+        	<input type="button" id="reset" value="Reset!" onclick="location.reload()"/>
+    	</div>
+    	<div id="mapbox">
+    		<ul id="map"></ul>
+    	</div>    	
+    	<script type="text/javascript">
+        	// set step-counter, initial value = 0
+        	var timer = document.getElementById("timer");
+            timer.value="0";
+            // bind to webpage elements
+            var oUl = document.getElementById("map");
+            var aLi = document.getElementsByTagName("li");
+            var oBtn = document.getElementById("btn")
+            // create a matrix, displayed as 20*20 grid-map
+            // 1: starting point
+            // 2: obstacle
+            // 3: destination                     
+            var map = [
+                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,
+                0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,2,0,0,0,
+                0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,2,0,0,0,
+                0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,
+                0,0,0,0,0,0,0,0,2,0,0,0,0,0,2,2,2,0,0,0,
+                0,0,0,0,1,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,2,0,0,
+                0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,2,0,0,
+                0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,2,0,0,
+                0,2,0,0,2,2,2,2,2,2,0,0,0,0,0,0,0,2,0,0,
+                0,2,2,0,0,0,0,0,0,0,0,2,0,2,2,2,2,2,0,0,
+                0,0,2,0,0,0,0,0,0,2,0,2,0,0,0,0,0,0,0,0,
+                0,0,2,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,0,
+                0,0,2,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                0,0,2,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,
+                0,0,2,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,
+                0,0,2,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,3
+            ];
+            // set starting point and destination
+            var beginLi = document.getElementsByClassName("style1");
+            var endLi = document.getElementsByClassName("style3");
+            // open list and close list
+            var openArr = [];
+            var closeArr = [];
+            // path-points list
+            var resultParent = [];
+
+            // initializing
+            init();
+            function init(){
+                createMap();
+                // click button "Find path!"
+                oBtn.onclick=function() {
+                	// start from starting point
+                	openFn();
+                }
+            }
+
+            // create map
+            function createMap(){
+                // set the size of each gird 
+                var liSize = 28;
+              	// for all map matrix
+                for(var i=0;i<map.length;i++){
+                    // create a grid
+                    var oLi = document.createElement("li");
+                    // grid width and height = 28 px                  
+                    oLi.style.width = liSize +"px";
+                    oLi.style.height = liSize + "px";                    
+                    // add to map
+                    oUl.appendChild(oLi);
+                    
+                    if(map[i]==1){
+                      	// style 1: starting point
+                        oLi.className = "style1";
+                        // add to open list
+                        openArr.push(oLi);
+                    }else if(map[i]==2){
+                        // style 2: obstacle
+                        oLi.className = "style2";
+                        // add to close list
+                        closeArr.push(oLi);
+                    }else if(map[i]==3){
+                        // style 3: destination
+                        oLi.className = "style3";
+                    }                    
+                }
+                // set the size of the map
+                // each grid = liSize + 1 px of li border
+                // additional 1 px of ul border
+                oUl.style.width = 20*(liSize+1)+1 + "px"
+            }
+
+            // estimate distance function
+            // f(n) = g(n) + h(n)
+            function fn(nowLi){           	
+            	return g(nowLi) + h(nowLi);            	
+            }
+            // distance: starting point -> current point
+            function g(nowLi){
+            	// x-axis difference
+            	var a = nowLi.offsetLeft - beginLi[0].offsetLeft;
+            	// y-axis difference
+            	var b = nowLi.offsetTop - beginLi[0].offsetTop;
+            	// Pythagorean theorem to get shortest distance between two points
+            	return Math.sqrt(a*a+b*b);
+            }
+            // distance: current point -> destination
+            function h(nowLi){
+            	var a = nowLi.offsetLeft - endLi[0].offsetLeft;
+            	var b = nowLi.offsetTop - endLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+
+            // add point to open list
+            function openFn(){
+            	// remove the first element in open list, which is the current point
+            	var nodeLi = openArr.shift();
+            	// if destination is in close list, terminate
+            	if(nodeLi==endLi[0]){
+            		showPath();
+            		return;
+            	}
+            	// move it to close list
+            	closeFn(nodeLi);
+            	// evaluate it's surrounding points
+            	findLi(nodeLi);
+            	// add new points to open list
+            	openFn();
+            }
+            // add point to close list
+            function closeFn(nodeLi){
+            	closeArr.push(nodeLi);
+            }
+            
+            // evaluate the surrounding points
+            function findLi(nodeLi){
+            	// set result list to store the candidate points
+            	var result = [];
+            	// firstly, filter out all passing points and obstacles on the map
+            	for(var i=0; i<aLi.length; i++){
+            		if(filter(aLi[i])){
+            			// add rest of points into result list
+            			result.push(aLi[i]);
+            		}
+            	}
+            	// next, find adjacent points of the current point
+            	for(var i=0; i<result.length; i++){
+            		// the difference of x and y axis should be less than the size of a grid
+            		// size is compensated by + 2px
+            			if(Math.abs(nodeLi.offsetLeft - result[i].offsetLeft)<=30 && Math.abs(nodeLi.offsetTop - result[i].offsetTop)<=30){          	
+        				// add the distance to its attribute "num"
+            			result[i].num=fn(result[i]);
+            			// add the current point to its attribute "parent"
+            			result[i].parent=nodeLi;
+            			// add points to open list
+            			openArr.push(result[i]);
+            			// find paths for all candidate points, until reach the destination
+            			if(result[i]!=endLi[0]){
+            				// color all candidate paths
+            				result[i].style.background="limegreen";
+        				}            				
+            		}            		            		
+            	}
+            }
+            
+            // check if this point can be chosen: yes---true, no---false
+            function filter(nodeLi){
+            	// if in close list, it is a passed point or obstacle
+            	for(var i = 0; i<closeArr.length; i++){
+            		if(nodeLi==closeArr[i]){
+            			return false;
+            		}
+            	}
+            	// if in open list, no need to choose
+            	for(var i = 0; i<openArr.length; i++){
+            		if(nodeLi==openArr[i]){
+            			return false;
+            		}
+            	}
+            	// if else, it is a candidate
+            	return true;
+            }
+            
+            // print the path
+            function showPath(){
+            	// the last point before destination is the last point in close list
+            	var lastLi = closeArr.pop();
+            	var iNow = 0;
+            	var time = 1;
+                // find all parents of the last point in close list   	
+            	findParent(lastLi);
+            	
+                // start step, start at 0, speed = 500
+            	var timer0 = setInterval(function(){
+                    // start from parent list 0, fill with red
+            		resultParent[iNow].style.background="red";
+            		iNow++;
+            		if(iNow==resultParent.length){
+            			clearInterval(timer0);
+            			oBtn.disabled=true;
+            		}
+            	},500)
+            	
+                //set timer, start at 0, for each step +1, speed = 500
+            	var desTime = setInterval(function(){
+            		timer.value=iNow;
+            		if(iNow==resultParent.length){
+            			clearInterval(desTime);
+            		}            		
+            	},500)
+            }
+            // find all passing points
+            function findParent(li){
+            	// add a point from the first slot of path point list
+            	resultParent.unshift(li);
+            	// until the parent point reaches the starting point, terminate
+            	if(li.parent==beginLi[0]){
+            		return;
+            	}
+            	// find the parent of the parent point, recursively
+            	findParent(li.parent);
+            }
+        </script>
+    </body>
+</html>

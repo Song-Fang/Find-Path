@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>A* Optimized Search App1</title>
+        <link rel="stylesheet" type="text/css" href="css/layout.css">        
+    </head>
+    <body>
+        <div id="header">
+            <h3 id="head">#Demo3: A* & Random Block</h3>
+        </div>
+        <div id="btnbox">
+            <input type="button" id="timer" value=""/>
+            <input type="button" id="btn" value="Find Path!"/>
+            <input type="button" id="reset" value="Reset!" onclick="location.reload()"/>
+        </div>
+        <div id="mapbox">
+            <ul id="map"></ul>
+        </div>          
+        <script type="text/javascript">
+            var timer2 = document.getElementById("timer");
+            timer2.value="0";
+            
+            var oUl = document.getElementById("map");
+            var aLi = document.getElementsByTagName("li");
+            var oBtn = document.getElementById("btn");           
+            var beginLi = document.getElementsByClassName("style1");
+            var endLi = document.getElementsByClassName("style3");
+            
+            var openArr = [];
+            var closeArr = [];
+            var resultParent = [];
+            
+            // create the map matrix randomly
+            var map = [];
+            // for all 20 * 20 grids, assign each grid with a value 2 or 0
+            // 0: roads
+            // 2: obstacles
+            for(var i =0;i<400;i++){
+            	var a=Math.random()*8;
+            	
+            	if(a<2){
+            		a=2;
+            	}else{
+            		a=0;
+            	}
+            	map.push(a);
+            }
+            // set the most left-top as start point
+            map[0]=1;
+            // set the most right-bottom as destination
+			map[399]=3;
+            
+            init();
+            function init(){                
+                createMap();
+                oBtn.onclick=function(){
+                	openFn();
+                	continue1.disabled=false;
+                }                
+            }
+
+            function createMap(){
+                 
+                var liSize = 28;
+              
+                for(var i=0;i<map.length;i++){
+                   
+                    var oLi = document.createElement("li");
+                    
+                    oLi.style.width = liSize +"px";
+                    oLi.style.height = liSize + "px";                
+                    oUl.appendChild(oLi);
+                    
+                    if(map[i]==1){
+                      
+                        oLi.className = "style1";
+                        openArr.push(oLi);
+                    }else if(map[i]==2){
+                        
+                        oLi.className = "style2";
+                        closeArr.push(oLi);    
+                    }else if(map[i]==3){
+                        
+                        oLi.className = "style3";
+                    }
+                    
+                    
+                }
+                oUl.style.width = 20*(liSize+1)+1 +"px"
+            }
+            
+            
+            
+            function fn(nowLi){
+            	
+            	return g(nowLi) + h(nowLi);
+            	
+            }
+            
+            function g(nowLi){
+            	var a = nowLi.offsetLeft-beginLi[0].offsetLeft;
+            	var b = nowLi.offsetTop - beginLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+            
+            function h(nowLi){
+            	var a = nowLi.offsetLeft-endLi[0].offsetLeft;
+            	var b = nowLi.offsetTop-endLi[0].offsetTop;
+            	return Math.sqrt(a*a+b*b);
+            }
+            
+            function openFn(){
+            	var nodeLi = openArr.shift();
+            	
+            	if(nodeLi==endLi[0]){
+            		showPath();
+            		return;
+            	}
+            	closeFn(nodeLi);
+            	findLi(nodeLi);
+            	
+            	
+            	openArr.sort(function(li1,li2){
+            		return li1.num-li2.num;
+            	})
+            	
+            	openFn();
+            }
+            
+            function closeFn(nodeLi){
+            	closeArr.push(nodeLi);
+            }
+            
+            function findLi(nodeLi){
+            	var result = [];
+
+            	for(var i = 0;i<aLi.length;i++){
+            		if(filter(aLi[i])){
+            			result.push(aLi[i]);
+            		}
+            	}
+            	
+            	for(var i =0;i<result.length;i++){
+            	   
+            		if(Math.abs(nodeLi.offsetLeft - result[i].offsetLeft)<=30 && Math.abs(nodeLi.offsetTop - result[i].offsetTop)<=30){
+            			result[i].num=fn(result[i]);
+            			result[i].parent=nodeLi;
+            			openArr.push(result[i]);
+            			if(result[i] != endLi[0]){
+            				result[i].style.background="limegreen";
+            			}
+            		}            		
+            	
+                }
+            }
+            
+            function filter(nodeLi){
+            	for(var i = 0;i<closeArr.length;i++){
+            		if(nodeLi==closeArr[i]){
+            			return false;
+            		}
+            	}
+            	
+            	for(var i =0;i<openArr.length;i++){
+            		if(nodeLi==openArr[i]){
+            			return false;
+            		}
+            	}
+            	
+            	return true;
+            }
+
+            function showPath(){
+            	var lastLi = closeArr.pop();
+            	var iNow = 0;
+            	var time = 1;
+
+            	findParent(lastLi);
+            	
+            	var timer = setInterval(function(){
+            		resultParent[iNow].style.background="red";
+            		iNow++;
+            		if(iNow==resultParent.length){
+            			clearInterval(timer);
+            			oBtn.disabled=true;
+            			
+            		}
+            	},500)
+            	
+            	var desTime = setInterval(function(){
+            		timer2.value=iNow;
+            		if(iNow==resultParent.length){
+            			clearInterval(desTime);
+            		}
+            		
+            	},500)
+            }
+                       
+            function findParent(li){
+            	resultParent.unshift(li);
+            	if(li.parent==beginLi[0]){
+            		return;
+            	}
+            	findParent(li.parent);
+            }
+                        
+        </script>
+    </body>
+</html>
+
